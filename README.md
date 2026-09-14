@@ -9,20 +9,22 @@ Tingginya angka dropout ini menjadi masalah besar bagi institusi pendidikan, kar
 ### Permasalahan Bisnis
 
 1. Seberapa besar tingkat dropout mahasiswa di Jaya Jaya Institut, dan faktor apa saja yang paling memengaruhinya?
-2. Bagaimana cara membangun sebuah sistem yang dapat **memprediksi risiko dropout mahasiswa** berdasarkan data pribadi, finansial, dan akademiknya?
+2. Bagaimana cara membangun sebuah model machine learning yang dapat **memprediksi status akhir mahasiswa** (Dropout / Enrolled / Graduate) berdasarkan data pribadi, finansial, dan akademiknya?
 3. Rekomendasi tindakan (*action items*) apa yang bisa diambil oleh pihak manajemen untuk menekan angka dropout?
 
 ### Cakupan Proyek
 
-1. **Data Understanding & Exploratory Data Analysis (EDA)** — memahami karakteristik data mahasiswa dan pola-pola yang berkaitan dengan dropout.
-2. **Data Preparation** — menyiapkan data (feature/target split, train-test split, scaling) agar siap digunakan oleh model machine learning.
-3. **Modeling & Evaluation** — melatih dan mengevaluasi model klasifikasi untuk memprediksi risiko dropout.
-4. **Business Dashboard** — membuat dashboard visual untuk memonitor performa mahasiswa.
-5. **Deployment (Prototype)** — membangun prototype aplikasi berbasis Streamlit agar model dapat langsung digunakan oleh pihak Jaya Jaya Institut, dan menghubungkannya dengan Streamlit Community Cloud.
+1. Data Understanding & Exploratory Data Analysis (EDA), memahami karakteristik data mahasiswa dan pola-pola yang berkaitan dengan status mahasiswa.
+2. Data Preparation, melakukan label encoding pada target, train-test split, dan feature scaling agar data siap digunakan oleh model machine learning.
+3. Modeling & Evaluation, melatih dan mengevaluasi model klasifikasi (Random Forest) untuk memprediksi status mahasiswa (Dropout / Enrolled / Graduate).
+4. Business Dashboard, membuat dashboard visual (Looker Studio) untuk memonitor performa dan risiko dropout mahasiswa.
+5. Deployment (Prototype), membangun prototype aplikasi berbasis Streamlit agar model dapat langsung digunakan oleh pihak Jaya Jaya Institut, dan menghubungkannya dengan Streamlit Community Cloud.
 
 ### Persiapan
 
 **Sumber data:** [Students' Performance Dataset](https://github.com/dicodingacademy/dicoding_dataset/blob/main/students_performance/README.md)
+
+**Python version:** `3.11.9`
 
 **Setup environment:**
 
@@ -44,34 +46,19 @@ jupyter notebook notebook.ipynb
 
 Dashboard dibuat untuk membantu Jaya Jaya Institut memonitor performa mahasiswa secara keseluruhan, meliputi:
 - Jumlah & proporsi mahasiswa berdasarkan status (Dropout / Enrolled / Graduate)
-- Pengaruh kondisi finansial (pembayaran UKT, status debitur, beasiswa) terhadap status mahasiswa
-- Sebaran nilai & jumlah mata kuliah yang lulus di semester 1 & 2 per status
-- Sebaran usia mahasiswa saat mendaftar
+- Pengaruh kondisi finansial (pembayaran UKT) dan beasiswa terhadap status mahasiswa
+- Sebaran nilai (grade) semester 1 & 2 per status
+- Distribusi status berdasarkan kelompok usia mahasiswa
 
-Dashboard ini dibangun menggunakan **Streamlit + Plotly** (`dashboard.py`) sehingga bisa langsung dijalankan secara lokal:
+Dashboard ini dibuat menggunakan **Looker Studio**:
 
-```bash
-streamlit run dashboard.py
-```
-
-> **Link akses dashboard:** `(isi dengan link Streamlit Community Cloud / Looker Studio / Tableau Public Anda di sini setelah proses deploy)`
-
-**Alternatif menggunakan Looker Studio / Tableau Public:**
-Jika Anda ingin menggunakan Looker Studio atau Tableau Public (misalnya karena reviewer lebih familiar dengan tools tersebut), Anda dapat:
-1. Mengunggah `data.csv` ke Google Sheets, lalu menghubungkannya sebagai data source di [Looker Studio](https://lookerstudio.google.com/).
-2. Membuat chart berikut agar dashboard dianggap valid (tidak hanya tabel):
-   - Pie/Bar chart distribusi `Status`
-   - Bar chart `Status` vs `Tuition_fees_up_to_date`
-   - Bar chart `Status` vs `Scholarship_holder`
-   - Box/Bar chart rata-rata `Curricular_units_2nd_sem_grade` per `Status`
-   - Histogram `Age_at_enrollment`
-3. Set opsi *Share* menjadi "Anyone with the link can view" agar dapat diakses reviewer.
+🔗 **Link Dashboard:** [https://datastudio.google.com/reporting/19eed07e-e3ac-4eb1-a5d5-da7bf7f4885a](https://datastudio.google.com/reporting/19eed07e-e3ac-4eb1-a5d5-da7bf7f4885a)
 
 ---
 
 ## Menjalankan Sistem Machine Learning (Prototype)
 
-Prototype sistem machine learning dibangun menggunakan **Streamlit** (`app.py`). Sistem ini menerima input data seorang mahasiswa (data diri, finansial, dan performa akademik), lalu mengeluarkan prediksi apakah mahasiswa tersebut **berisiko Dropout** atau **Tidak**, beserta estimasi peluangnya.
+Prototype sistem machine learning dibangun menggunakan **Streamlit** (app.py), memanfaatkan model rf_model.pkl dan scaler.pkl yang telah dilatih pada notebook.ipynb. Sistem ini menerima input data seorang mahasiswa (data diri, finansial, dan performa akademik), lalu mengeluarkan prediksi status mahasiswa tersebut: **Dropout**, **Enrolled**, atau **Graduate**.
 
 ### Cara menjalankan secara lokal
 
@@ -79,7 +66,7 @@ Prototype sistem machine learning dibangun menggunakan **Streamlit** (`app.py`).
 # 1. pastikan requirements.txt sudah terinstall
 pip install -r requirements.txt
 
-# 2. pastikan file model.pkl, scaler.pkl, dan feature_columns.pkl
+# 2. pastikan file model/rf_model.pkl dan model/scaler.pkl
 #    berada satu folder dengan app.py (file ini dihasilkan dari notebook.ipynb)
 
 # 3. jalankan aplikasi
@@ -88,14 +75,8 @@ streamlit run app.py
 
 Aplikasi akan terbuka otomatis di browser pada alamat `http://localhost:8501`.
 
-### Cara deploy ke Streamlit Community Cloud
 
-1. Push seluruh folder proyek ini (termasuk `app.py`, `model.pkl`, `scaler.pkl`, `feature_columns.pkl`, `requirements.txt`) ke sebuah repository GitHub.
-2. Buka [share.streamlit.io](https://share.streamlit.io/), login dengan akun GitHub Anda.
-3. Klik **New app**, pilih repository & branch yang berisi proyek ini, lalu set **Main file path** menjadi `app.py`.
-4. Klik **Deploy**. Streamlit Cloud akan otomatis meng-install `requirements.txt` dan menjalankan aplikasi.
-
-> **Link akses prototype:** `(isi dengan link Streamlit Community Cloud Anda di sini setelah proses deploy, misalnya https://nama-app-anda.streamlit.app)`
+🔗 **Link Prototype:** [https://dashboard-prediksi-dropout-mahasiswa.streamlit.app/](https://dashboard-prediksi-dropout-mahasiswa.streamlit.app/)
 
 ---
 
@@ -103,35 +84,21 @@ Aplikasi akan terbuka otomatis di browser pada alamat `http://localhost:8501`.
 
 Berdasarkan proses *data understanding*, EDA, hingga *modeling* yang telah dilakukan, dapat disimpulkan:
 
-1. Dari total **4.424 mahasiswa**, sekitar **32% (1.421 mahasiswa) berstatus Dropout** — sebuah angka yang cukup signifikan dan menegaskan urgensi masalah ini bagi Jaya Jaya Institut.
-2. **Performa akademik di semester 1 dan 2** (khususnya jumlah mata kuliah yang berhasil disetujui/lulus dan rata-rata nilai) merupakan faktor **paling berpengaruh** terhadap kemungkinan dropout — semakin sedikit mata kuliah yang lulus, semakin besar risiko dropout.
-3. **Kondisi finansial** juga berperan penting: mahasiswa yang **menunggak pembayaran UKT** atau **berstatus debitur** memiliki proporsi dropout yang jauh lebih tinggi, sementara mahasiswa **penerima beasiswa** cenderung memiliki risiko dropout yang lebih rendah.
-4. Model **Logistic Regression** yang dilatih berhasil memprediksi risiko dropout dengan **akurasi ±87%** dan **ROC-AUC ±0.93**, serta dipilih sebagai model final karena memiliki *recall* yang baik pada kelas Dropout dan mudah diinterpretasikan oleh pihak non-teknis.
-5. Model ini telah diimplementasikan dalam bentuk **prototype aplikasi Streamlit** (`app.py`) sehingga pihak Jaya Jaya Institut dapat langsung memanfaatkannya sebagai *early warning system*.
+1. Dari total **4.424 mahasiswa**, sekitar **32% (1.421 mahasiswa) berstatus Dropout**, ~50% (2.209 mahasiswa) **Graduate**, dan ~18% (794 mahasiswa) masih **Enrolled** — angka dropout ini cukup signifikan dan menegaskan urgensi masalah bagi Jaya Jaya Institut.
+2. **Performa akademik di semester 1 dan 2** (khususnya jumlah mata kuliah yang berhasil disetujui/lulus dan rata-rata nilai) merupakan **faktor paling berpengaruh** terhadap status akhir mahasiswa, diikuti oleh **status pembayaran UKT**.
+3. Model **Random Forest Classifier** (n_estimators=200, max_depth=10, min_samples_split=10) berhasil memprediksi status mahasiswa (Dropout/Enrolled/Graduate) dengan **akurasi 76%**. Model ini cukup kuat dalam mendeteksi mahasiswa **Dropout** (precision 0.84, recall 0.74) dan **Graduate** (recall 0.95), meskipun masih kurang optimal dalam mengenali kelas **Enrolled** (recall 0.28) karena sifatnya yang transisional dan jumlah datanya paling sedikit.
+4. Model ini telah disimpan (rf_model.pkl beserta scaler.pkl) dan diimplementasikan dalam bentuk **prototype aplikasi Streamlit**, sehingga pihak Jaya Jaya Institut dapat langsung memanfaatkannya sebagai *early warning system*.
 
 Dengan sistem ini, Jaya Jaya Institut diharapkan dapat mendeteksi mahasiswa berisiko dropout **lebih awal** (bahkan sejak akhir semester 1), sehingga bimbingan khusus dapat diberikan sebelum mahasiswa benar-benar keluar dari perkuliahan.
 
 ### Rekomendasi Action Items
 
-1. **Bangun sistem monitoring akademik dini.** Gunakan prototype/model ini untuk melakukan scoring risiko dropout setiap akhir semester (terutama setelah semester 1), lalu tandai mahasiswa dengan peluang dropout tinggi (misalnya > 50%) untuk ditindaklanjuti oleh bagian akademik.
-2. **Berikan program bimbingan akademik (akademik advisory) khusus** bagi mahasiswa yang jumlah mata kuliah lulusnya rendah atau nilainya di bawah rata-rata pada semester 1, karena performa akademik awal adalah prediktor terkuat dropout.
-3. **Perkuat dukungan finansial**, misalnya program cicilan UKT atau bantuan dana darurat, bagi mahasiswa yang berstatus debitur atau menunggak pembayaran, mengingat kelompok ini memiliki risiko dropout yang jauh lebih tinggi.
-4. **Perluas dan sosialisasikan program beasiswa**, karena data menunjukkan mahasiswa penerima beasiswa memiliki risiko dropout yang lebih rendah — beasiswa dapat menjadi salah satu bentuk intervensi preventif.
-5. **Lakukan monitoring berkala melalui dashboard** yang telah dibuat, agar pihak manajemen dapat memantau tren dropout dari waktu ke waktu dan mengevaluasi efektivitas program-program intervensi yang telah dijalankan.
-6. **Evaluasi & retrain model secara berkala** (misalnya setiap tahun ajaran baru) menggunakan data terbaru, agar model tetap relevan mengikuti perubahan karakteristik mahasiswa maupun kebijakan institusi.
+1. **Bangun sistem monitoring akademik dini.** Gunakan prototype/model ini untuk melakukan scoring status mahasiswa setiap akhir semester (terutama setelah semester 1), lalu tandai mahasiswa dengan prediksi **Dropout** untuk ditindaklanjuti oleh bagian akademik.
+2. **Berikan program bimbingan akademik (academic advisory) khusus** bagi mahasiswa dengan jumlah mata kuliah lulus rendah atau nilai di bawah rata-rata pada semester 1, karena performa akademik awal adalah prediktor terkuat status dropout.
+3. **Perkuat dukungan finansial**, misalnya program cicilan UKT atau bantuan dana darurat, bagi mahasiswa yang menunggak pembayaran, mengingat status pembayaran UKT merupakan salah satu faktor penting yang memengaruhi risiko dropout.
+4. **Perluas dan sosialisasikan program beasiswa** sebagai salah satu bentuk intervensi preventif bagi mahasiswa yang berisiko dropout.
+5. **Berikan perhatian khusus pada mahasiswa berstatus Enrolled** yang menunjukkan pola akademik menyerupai mahasiswa Dropout (nilai rendah, sedikit mata kuliah lulus), karena model menunjukkan kelas ini paling sulit dibedakan dan berpotensi menjadi dropout berikutnya jika tidak ditangani.
+6. **Lakukan monitoring berkala melalui dashboard** yang telah dibuat di Looker Studio, agar pihak manajemen dapat memantau tren dropout dari waktu ke waktu dan mengevaluasi efektivitas program-program intervensi yang telah dijalankan.
+7. **Evaluasi & retrain model secara berkala** (misalnya setiap tahun ajaran baru) menggunakan data terbaru, agar model tetap relevan mengikuti perubahan karakteristik mahasiswa maupun kebijakan institusi.
 
 ---
-
-## Struktur Berkas Proyek
-
-```
-├── notebook.ipynb          # Notebook lengkap: business understanding s.d. evaluation (sudah dijalankan)
-├── data.csv                # Dataset mahasiswa Jaya Jaya Institut
-├── app.py                  # Prototype sistem ML (Streamlit) untuk prediksi risiko dropout
-├── dashboard.py            # Business dashboard (Streamlit + Plotly)
-├── model.pkl               # Model Logistic Regression yang sudah dilatih
-├── scaler.pkl              # StandardScaler yang sudah di-fit pada data training
-├── feature_columns.pkl     # Daftar & urutan kolom fitur yang dipakai model
-├── requirements.txt        # Daftar library yang dibutuhkan
-└── README.md                # Dokumentasi proyek (berkas ini)
-```
