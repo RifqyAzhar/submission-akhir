@@ -26,7 +26,7 @@ st.title("🎓 Prediksi Risiko Dropout Mahasiswa")
 st.markdown(
     """
     Aplikasi ini membantu **Jaya Jaya Institut** memprediksi apakah seorang
-    mahasiswa berpotensi **Dropout** atau **Tidak Dropout**, berdasarkan data
+    mahasiswa berpotensi **Dropout** atau **Graduate**, berdasarkan data
     pribadi, finansial, dan performa akademiknya.
 
     Silakan isi data mahasiswa pada form di bawah ini, lalu klik tombol
@@ -180,21 +180,23 @@ if submitted:
     # Scaling & Prediksi
     input_scaled = scaler.transform(input_df)
     prediction = model.predict(input_scaled)[0]
-    
-    probability_dropout = model.predict_proba(input_scaled)[0][0]
+
+    # model sekarang dilatih dengan target biner 1 = Dropout, 0 = Graduate
+    # sehingga peluang dropout diambil dari kelas indeks ke-1 (bukan ke-0 lagi)
+    probability_dropout = model.predict_proba(input_scaled)[0][1]
 
     st.divider()
     st.subheader("Hasil Prediksi")
 
-    # Ubah logika, Jika hasil prediksi adalah 0 (Dropout)
-    if prediction == 0:
+    # Jika hasil prediksi adalah 1 (Dropout)
+    if prediction == 1:
         st.error(f"Mahasiswa ini **BERISIKO DROPOUT** (peluang: {probability_dropout*100:.1f}%)")
         st.markdown(
             "**Rekomendasi:** segera hubungi mahasiswa untuk sesi bimbingan/konseling, "
             "cek kendala akademik maupun finansial yang dihadapi."
         )
     else:
-        st.success(f"Mahasiswa ini **TIDAK BERISIKO DROPOUT** (peluang dropout: {probability_dropout*100:.1f}%)")
+        st.success(f"Mahasiswa ini **DIPREDIKSI GRADUATE** (peluang dropout: {probability_dropout*100:.1f}%)")
         st.markdown("Tetap pantau performa mahasiswa secara berkala.")
 
     st.progress(min(int(probability_dropout * 100), 100))
